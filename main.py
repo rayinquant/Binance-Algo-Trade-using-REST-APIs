@@ -14,6 +14,9 @@ load_dotenv()
 BINANCE_API_KEY = os.environ.get('BINANCE_API_KEY')
 BINANCE_SECRET_KEY = os.environ.get('BINANCE_SECRET_KEY')
 BASE_URL = 'https://testnet.binancefuture.com'  # Binance Futures API endpoint
+CRYPTOQUANT_API_KEY = os.environ.get('CRYPTOQUANT_API_KEY')
+CRYPTOQUANT_BASE_URL = 'https://api.cryptoquant.com/v1'  # Replace with actual API base if different
+
 
 # Trading parameters
 SYMBOL = 'BTCUSDT'                 # Binance futures trading symbol
@@ -161,11 +164,30 @@ def create_futures_market_order(symbol, side, quantity):
 
 # Simulated function to fetch CryptoQuant data
 def fetch_cryptoquant_data():
-    data = {
-        'exchange_inflow': 500,
-        'exchange_outflow': 300
+    
+    endpoint = '/btc/market-data/taker-buy-sell-stats?window=day&exchange=binance'
+    params = {
+        'window':'day',
+        'exchange':'binance'
     }
-    return data
+
+    url = f"{CRYPTOQUANT_BASE_URL}{endpoint}"
+    headers = {
+        'X-API-KEY': CRYPTOQUANT_API_KEY
+    }
+    response = requests.get(url, headers=headers, params=params)
+    
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f'Error: {response.status_code}, {response.text}')
+        return None
+    
+    # data = {
+    #     'exchange_inflow': 500,
+    #     'exchange_outflow': 300
+    # }
+    # return data
 
 # Calculate signal from the CryptoQuant data
 def calculate_signal(data):
