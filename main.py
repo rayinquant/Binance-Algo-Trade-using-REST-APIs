@@ -230,14 +230,6 @@ def get_futures_balance(asset):
         print(f"Failed to fetch balance: {response.status_code} {response.text}")
         return None
 
-# Calculate the position size dynamically based on wallet balance
-def calculate_position_size(balance):
-    current_price = get_current_futures_price(SYMBOL)
-    if current_price:
-        position_size = round((balance * POSITION_PERCENTAGE) / current_price, 3)
-        return position_size
-    return None
-
 # Fetch the current price of the futures symbol
 def get_current_futures_price(symbol):
     endpoint = '/fapi/v1/ticker/price'
@@ -249,6 +241,30 @@ def get_current_futures_price(symbol):
         return float(response.json()['price'])
     else:
         print(f"Failed to fetch price: {response.status_code} {response.text}")
+        return None
+
+# Calculate the position size dynamically based on wallet balance
+def calculate_position_size(balance):
+    current_price = get_current_futures_price(SYMBOL)
+    if current_price:
+        position_size = round((balance * POSITION_PERCENTAGE) / current_price, 3)
+        return position_size
+    return None
+
+# Fetch 1-hour candles from Binance Futures
+def get_futures_candles(symbol, interval):
+    endpoint = '/fapi/v1/klines'
+    params = {
+        'symbol': symbol,
+        'interval': interval,
+        'limit': 1
+    }
+    url = f"{BASE_URL}{endpoint}"
+
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        return response.json()
+    else:
         return None
 
 # Main trading function
@@ -293,23 +309,6 @@ def main():
                 last_candle_time = candle_time
 
         time.sleep(INTERVAL_SECONDS)
-
-
-# Fetch 1-hour candles from Binance Futures
-def get_futures_candles(symbol, interval):
-    endpoint = '/fapi/v1/klines'
-    params = {
-        'symbol': symbol,
-        'interval': interval,
-        'limit': 1
-    }
-    url = f"{BASE_URL}{endpoint}"
-
-    response = requests.get(url, params=params)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return None
 
 if __name__ == "__main__":
     main()
