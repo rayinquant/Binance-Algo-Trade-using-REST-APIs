@@ -32,25 +32,6 @@ MARGIN_TYPE = 'CROSSED'            # 'CROSSED' or 'ISOLATED'
 def generate_signature(query_string, secret_key):
     return hmac.new(secret_key.encode('utf-8'), query_string.encode('utf-8'), hashlib.sha256).hexdigest()
 
-# Get wallet balance
-def get_wallet_balance(): 
-    try:
-        endpoint = '/fapi/v3/balance'
-        timestamp = int(time.time() * 1000)
-
-        params = {
-            'timestamp': timestamp
-        }
-
-        query_string = urlencode(params)
-        signature = generate_signature(query_string, BINANCE_SECRET_KEY)
-
-        response = requests.get(f'{BASE_URL}{endpoint}?{query_string}&signature={signature}')
-        return response.json()
-    except Exception as e:
-        print(f"Error fetching wallet balance: {e}")
-        return None
-
 # Set leverage for a futures symbol
 def set_futures_leverage(symbol, leverage):
     endpoint = '/fapi/v1/leverage'
